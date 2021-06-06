@@ -35,16 +35,16 @@ class App extends Component {
         const token = new web3.eth.Contract(Token.abi, Token.networks[netId].address)
         const dbank = new web3.eth.Contract(dBank.abi, dBank.networks[netId].address)
         const dbankAddress = dBank.networks[netId].address
-
-        console.log(dBank.networks[netId].address)
-
+        const dbankBalance = await web3.eth.getBalance(dbankAddress)
         const tokenBalance = await token.methods.balanceOf(this.state.account).call()
 
-        console.log(web3.utils.fromWei(tokenBalance))
+        console.log('dbank balance : ', web3.utils.fromWei(dbankBalance))
+        console.log('token balance : ', web3.utils.fromWei(tokenBalance))
 
-        this.setState({ token: token, dbank: dbank, dbankAddress: dbankAddress })
+        // etherBalanceOf[msg.sender]
+        this.setState({ token: token, dbank: dbank, dbankAddress: dbankAddress, dbankBalance : dbankBalance })
 
-        console.log(this.state.dbankAddress)
+        // console.log(this.state.dbankAddress)
       }
       catch (e) {
         console.log('Error : ', e)
@@ -95,10 +95,9 @@ class App extends Component {
         const collateralEther = await this.state.dbank.methods.collateralEther(this.state.account).call({ from: this.state.account })
         const tokenBorrowed = collateralEther / 2
 
-        console.log(this.state.account)
-        console.log(this.state.balance)
+        console.log('collateralEther : ', Web3.utils.fromWei( collateralEther))
+        console.log('tokenBorrowed : ',  Web3.utils.fromWei(tokenBorrowed))
         // console.log(this.state.token)
-        console.log(this.state.dbankAddress)
 
         await this.state.token.methods.approve(this.state.dbankAddress, tokenBorrowed.toString()).send({ from: this.state.account })
         await this.state.dbank.methods.payOff().send({ from: this.state.account })
@@ -116,7 +115,8 @@ class App extends Component {
       token: null,
       dbank: null,
       balance: 0,
-      dBankAddress: null
+      dBankAddress: null,
+      dbankBalance: null
     }
   }
   render() {
